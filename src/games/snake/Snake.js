@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 
 function Snake(props) {
-    let maxY = 10;
-    let maxX = 10;
+    let maxY = 50;
+    let maxX = 100;
     let board = createBoard(maxY, maxX);
 
     const [transform, setTransform] = useState({dX:0, dY:-1});
@@ -11,7 +11,7 @@ function Snake(props) {
         {X:maxX/2, Y:maxY/2},
         {X:maxX/2, Y:maxY/2},
         {X:maxX/2, Y:maxY/2}
-        ])
+        ]);
 
     snake.forEach(p => board[p.Y].values[p.X].value = 1)
 
@@ -28,15 +28,20 @@ function Snake(props) {
         )
     })
 
+
+    function moveForward() {
+        var nextSnake = [...snake];
+        nextSnake.unshift({Y: nextSnake[0].Y + transform.dY, X: nextSnake[0].X + transform.dX})
+        nextSnake.pop();
+        setSnake(nextSnake)
+    }
+
     function move(event) {
         var key = event.key || "";
 
         if (key === "ArrowUp") {
             console.log("MOVE - forward")
-            var nextSnake = [...snake];
-            nextSnake.unshift({Y:nextSnake[0].Y + transform.dY, X:nextSnake[0].X + transform.dX})
-            nextSnake.pop();
-            setSnake(nextSnake)
+            moveForward();
         } else if (key === "ArrowLeft") {
             console.log("MOVE - turn left")
             setTransform({dY: transform.dX*(-1), dX: transform.dY})
@@ -48,6 +53,8 @@ function Snake(props) {
 
         }
     }
+
+    useInterval(() => moveForward(), 1000);
     return(
         <div className={"snake"} align={'center'}  onKeyDown={move} tabIndex={0}>
             <h1>Welcome to Snake</h1>
@@ -69,4 +76,23 @@ function createBoard(height, width) {
     return result;
 }
 
+function useInterval(callback, delay) {
+    const savedCallback = useRef();
+
+    // Remember the latest callback.
+    useEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
+
+    // Set up the interval.
+    useEffect(() => {
+        function tick() {
+            savedCallback.current();
+        }
+        if (delay !== null) {
+            let id = setInterval(tick, delay);
+            return () => clearInterval(id);
+        }
+    }, [delay]);
+}
 export default Snake;
