@@ -13,6 +13,7 @@ function Snake(props) {
         {X:maxX/2, Y:maxY/2}
         ]);
 
+    const [speed, setSpeed] = useState(1000);
     snake.forEach(p => board[p.Y].values[p.X].value = 1)
 
     let boardUI = board.map(row => {
@@ -40,8 +41,12 @@ function Snake(props) {
         var key = event.key || "";
 
         if (key === "ArrowUp") {
-            console.log("MOVE - forward")
-            moveForward();
+            let newSpeed = speed - 100;
+            console.log("MOVE - faster", newSpeed)
+            setSpeed(newSpeed);
+        } else if (key === "ArrowDown") {
+            console.log("MOVE - slower")
+            setSpeed(speed + 100);
         } else if (key === "ArrowLeft") {
             console.log("MOVE - turn left")
             setTransform({dY: transform.dX*(-1), dX: transform.dY})
@@ -54,7 +59,7 @@ function Snake(props) {
         }
     }
 
-    useInterval(() => moveForward(), 1000);
+    useInterval(() => moveForward(), speed);
     return(
         <div className={"snake"} align={'center'}  onKeyDown={move} tabIndex={0}>
             <h1>Welcome to Snake</h1>
