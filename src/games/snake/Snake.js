@@ -32,7 +32,7 @@ function Snake(props) {
         setState({...state, snake:nextSnake});
     }
 
-    function move(event) {
+    function handleKeyEvent(event) {
         var key = event.key || "";
         if (state.gameState === RUNNING) {
             if (key === "ArrowUp") {
@@ -77,7 +77,7 @@ function Snake(props) {
     })();
 
     return (
-        <div className={"snake"} align={'center'} onClick={handleOnClick} onKeyDown={move} tabIndex={0}>
+        <div className={"snake"} align={'center'} onClick={handleOnClick} onKeyDown={handleKeyEvent} tabIndex={0}>
             <h1>Welcome to Snake</h1>
             <p>{info}</p>
             <table className={"board"}>
