@@ -8,14 +8,9 @@ function Snake(props) {
     let maxY = 50;
     let maxX = 100;
     let board = createBoard(maxY, maxX);
+    const [state, setState] = useState(getInitialState(SETUP, maxX, maxY))
 
-    const [gameState, setGameState] = useState(SETUP);
-    const [speed, setSpeed] = useState(getInitialSpeed());
-    const [transform, setTransform] = useState(getInitialTransformer());
-    const [snake, setSnake] = useState(getInitialSnakeState(maxX, maxY));
-
-    snake.forEach(p => board[p.Y].values[p.X].value = 1)
-
+    state.snake.forEach(p => board[p.Y].values[p.X].value = 1)
     let boardUI = board.map(row => {
         let cols = row.values.map(col => {
             var className = col.value === 1 ? "occupied" : "empty";
@@ -31,28 +26,28 @@ function Snake(props) {
 
 
     function moveForward() {
-        var nextSnake = [...snake];
-        nextSnake.unshift({Y: nextSnake[0].Y + transform.dY, X: nextSnake[0].X + transform.dX})
+        var nextSnake = [...state.snake];
+        nextSnake.unshift({Y: nextSnake[0].Y + state.transform.dY, X: nextSnake[0].X + state.transform.dX})
         nextSnake.pop();
-        setSnake(nextSnake)
+        setState({...state, snake:nextSnake});
     }
 
     function move(event) {
         var key = event.key || "";
-        if (gameState === RUNNING) {
+        if (state.gameState === RUNNING) {
             if (key === "ArrowUp") {
-                let newSpeed = speed - 100;
+                let newSpeed = state.speed - 100;
                 console.log("MOVE - faster", newSpeed);
-                setSpeed(newSpeed);
+                setState({...state, speed: newSpeed});
             } else if (key === "ArrowDown") {
                 console.log("MOVE - slower");
-                setSpeed(speed + 100);
+                setState({...state, speed: state.speed + 100});
             } else if (key === "ArrowLeft") {
                 console.log("MOVE - turn left");
-                setTransform({dY: transform.dX * (-1), dX: transform.dY});
+                setState({...state, transform:{dY: state.transform.dX * (-1), dX: state.transform.dY}})
             } else if (key === "ArrowRight") {
                 console.log("MOVE - turn right");
-                setTransform({dY: transform.dX, dX: transform.dY * (-1)});
+                setState({...state, transform:{dY: state.transform.dX, dX: state.transform.dY * (-1)}})
             } else {
                 console.log("MOVE - " + event.key);
 
@@ -61,26 +56,22 @@ function Snake(props) {
     }
 
     function handleOnClick(evt) {
-        console.log("startGame", gameState)
-        if (gameState === SETUP) {
-            setGameState(RUNNING);
-        } else if (gameState === RUNNING) {
-            setGameState(GAMEOVER);
-        } else if (gameState === GAMEOVER) {
-            setTransform(getInitialTransformer());
-            setSnake(getInitialSnakeState(maxX, maxY));
-            setSpeed(getInitialSpeed());
-            setGameState(SETUP);
+        if (state.gameState === SETUP) {
+            setState({...state, gameState:RUNNING});
+        } else if (state.gameState === RUNNING) {
+            setState({...state, gameState:GAMEOVER});
+        } else if (state.gameState === GAMEOVER) {
+            setState(getInitialState(SETUP, maxX, maxY))
         }
     }
-    useInterval(() => {if (gameState === RUNNING) moveForward()}, speed);
+    useInterval(() => {if (state.gameState === RUNNING) moveForward()}, state.speed);
 
     var info = (() => {
-        if (gameState === SETUP) {
+        if (state.gameState === SETUP) {
             return "Klick to start";
-        } else if (gameState === RUNNING) {
+        } else if (state.gameState === RUNNING) {
             return "Use LEFT and RIGHT to turn the snake";
-        } else if (gameState === GAMEOVER) {
+        } else if (state.gameState === GAMEOVER) {
             return "Game Over!"
         }
     })();
@@ -113,6 +104,16 @@ function getInitialSnakeState(maxX, maxY) {
         {X: maxX / 2, Y: maxY / 2}
     ];
 }
+
+function getInitialState(gameState, maxX, maxY) {
+    return {
+        gameState: gameState,
+        speed: getInitialSpeed(),
+        transform: getInitialTransformer(),
+        snake: getInitialSnakeState(maxX, maxY)
+    };
+}
+
 function getInitialTransformer() {
     return {dX: 0, dY: -1};
 }
