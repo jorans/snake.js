@@ -26,10 +26,21 @@ function Snake(props) {
 
 
     function moveForward() {
+        let nextY = state.snake[0].Y + state.transform.dY;
+        let nextX = state.snake[0].X + state.transform.dX;
+        let nextGameState = isOutOfBounds(nextX, nextY) ? GAMEOVER : state.gameState;
+
+
         var nextSnake = [...state.snake];
-        nextSnake.unshift({Y: nextSnake[0].Y + state.transform.dY, X: nextSnake[0].X + state.transform.dX})
-        nextSnake.pop();
-        setState({...state, snake:nextSnake});
+        if (!isOutOfBounds(nextX, nextY)) {
+            nextSnake.unshift({Y: nextY, X: nextX})
+            nextSnake.pop();
+        }
+        setState({...state, snake:nextSnake, gameState:nextGameState});
+    }
+
+    function isOutOfBounds(x, y) {
+        return y < 0 || y > maxY || x < 0 || x > maxX;
     }
 
     function handleKeyEvent(event) {
