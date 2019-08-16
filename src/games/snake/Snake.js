@@ -5,8 +5,8 @@ function Snake(props) {
     let SETUP = 0;
     let RUNNING = 1;
     let GAMEOVER = 2;
-    let height = 20;
-    let width = 20;
+    let height = props.height;
+    let width = props.width;
     let board = createBoard(height, width);
     const [state, setState] = useState(getInitialState(SETUP, width, height))
 
@@ -26,17 +26,20 @@ function Snake(props) {
 
     function moveForward() {
         let nextSnakeHead = getNextSnakeHead(state.snake, state.transform);
-        let nextGameState = isOutOfBounds(nextSnakeHead, width, height) ? GAMEOVER : state.gameState;
+        let outOfBounds = isOutOfBounds(nextSnakeHead, width, height);
 
+        let nextGameState = outOfBounds ? GAMEOVER : state.gameState;
         var nextSnake = [...state.snake];
         var nextScore = state.score;
         var nextFruit = state.fruit;
-        if (!isOutOfBounds(nextSnakeHead, width, height)) {
+
+        if (!outOfBounds) {
             nextSnake.unshift(nextSnakeHead)
             nextSnake.pop();
 
             if (samePos(nextSnakeHead, state.fruit)) {
                 nextScore += 1;
+                nextSnake = enlargeSnake(nextSnake);
                 nextFruit = getRandomFruitPos(width, height, nextSnake)
             }
         }
@@ -104,6 +107,14 @@ function Snake(props) {
         </div>
     )
 }
+function enlargeSnake(snake) {
+    let tipOfTail = snake[snake.length-1];
+    let nextSnake = [...snake];
+    for(var i = 0; i < 5; i++){
+        nextSnake.push(tipOfTail);
+    }
+    return nextSnake;
+}
 
 function getNextSnakeHead(snake, transform) {
     let nextY = snake[0].Y + transform.dY;
@@ -112,7 +123,7 @@ function getNextSnakeHead(snake, transform) {
 }
 
 function isOutOfBounds(pos, width, height) {
-    return pos.Y < 0 || pos.Y > height || pos.X < 0 || pos.X > width;
+    return pos.Y < 0 || pos.Y >= height || pos.X < 0 || pos.X >= width;
 }
 
 function getRandomFruitPos(maxX, maxY, snake) {
@@ -192,7 +203,7 @@ function getInitialTransformer() {
     return {dX: 0, dY: -1};
 }
 function getInitialSpeed() {
-    return 1000;
+    return 300;
 }
 
 function useInterval(callback, delay) {
