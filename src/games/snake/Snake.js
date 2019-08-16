@@ -34,7 +34,7 @@ function Snake(props) {
         var nextFruit = state.fruit;
 
         if (!outOfBounds) {
-            nextSnake.unshift(nextSnakeHead)
+            nextSnake.unshift(nextSnakeHead);
             nextSnake.pop();
 
             if (samePos(nextSnakeHead, state.fruit)) {
@@ -56,21 +56,23 @@ function Snake(props) {
         var key = event.key || "";
         if (state.gameState === RUNNING) {
             if (key === "ArrowUp") {
-                let newSpeed = state.speed - 100;
-                console.log("MOVE - faster", newSpeed);
-                setState({...state, speed: newSpeed});
+                setState({...state, speed: state.speed - 100});
             } else if (key === "ArrowDown") {
-                console.log("MOVE - slower");
                 setState({...state, speed: state.speed + 100});
             } else if (key === "ArrowLeft") {
-                console.log("MOVE - turn left");
                 setState({...state, transform:{dY: state.transform.dX * (-1), dX: state.transform.dY}})
             } else if (key === "ArrowRight") {
-                console.log("MOVE - turn right");
                 setState({...state, transform:{dY: state.transform.dX, dX: state.transform.dY * (-1)}})
+            } else if (key === "a") {
+                setState({...state, transform:{dY: 0, dX: -1}})
+            } else if (key === "w") {
+                setState({...state, transform:{dY: -1, dX: 0}})
+            } else if (key === "d") {
+                setState({...state, transform:{dY: 0, dX: 1}})
+            } else if (key === "s") {
+                setState({...state, transform:{dY: 1, dX: 0}})
             } else {
                 console.log("MOVE - " + event.key);
-
             }
         }
     }
@@ -88,18 +90,19 @@ function Snake(props) {
 
     var info = (() => {
         if (state.gameState === SETUP) {
-            return "Klick to start";
+            return(<p>Click to start</p>);
         } else if (state.gameState === RUNNING) {
-            return "Use LEFT and RIGHT to turn the snake";
+            return(<p>Use <b>LEFT</b> or <b>RIGHT</b> to turn the snakes head<br/>
+                or <b>a, w, d, s</b> to go West, North, East or South</p>);
         } else if (state.gameState === GAMEOVER) {
-            return "Game Over!"
+            return(<h3>Game Over!</h3>)
         }
     })();
 
     return (
         <div className={"snake"} align={'center'} onClick={handleOnClick} onKeyDown={handleKeyEvent} tabIndex={0}>
             <h1>Welcome to Snake</h1>
-            <p>{info}</p>
+            {info}
             <h2>Score:{state.score}</h2>
             <table className={"board"}>
                 <tbody>{boardUI}</tbody>
