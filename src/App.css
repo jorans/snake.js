@@ -18,6 +18,9 @@ table.board td.empty{
 table.board td.occupied{
   background-color: black;
 }
+table.board td.apple{
+  background-color: red;
+}
 .App {
   text-align: center;
 }
