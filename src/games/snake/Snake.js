@@ -132,7 +132,7 @@ function getRandomFruitPos(maxX, maxY, snake) {
             throw "Exhusted attempts to find fruit position";
         }
         var fruitPos = getRadomPos(maxX, maxY);
-        if (!contains(fruitPos, snake)) {
+        if (!contains(fruitPos, snake, samePos)) {
             return fruitPos;
         }
         return getRandomFruitPosRecursive(maxX, maxY, snake, --remainingAttempts);
@@ -145,9 +145,9 @@ function getRandomFruitPos(maxX, maxY, snake) {
 function samePos(a, b) {
     return a.X === b.X && a.Y === b.Y;
 }
-function contains(p, ps) {
+function contains(p, ps, comp) {
     return ps.some(pp => {
-        return p === pp;
+        return comp(p,pp);
     })
 }
 function getRadomPos(maxX, maxY){
