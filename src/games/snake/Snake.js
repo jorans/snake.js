@@ -25,22 +25,24 @@ function Snake(props) {
     })
 
     function moveForward() {
-        let nextSnakeHead = getNextSnakeHead(state.snake, state.transform);
+        let {snake, gameState, transform, score, fruit} = state;
+        let nextSnakeHead = getNextSnakeHead(state.snake, transform);
         let outOfBounds = isOutOfBounds(nextSnakeHead, width, height);
+        let snakeCollision = isSnakeEatingItSelf(nextSnakeHead, state.snake);
+        let nextGameState = outOfBounds || snakeCollision ? GAMEOVER : gameState;
 
-        let nextGameState = outOfBounds ? GAMEOVER : state.gameState;
-        var nextSnake = [...state.snake];
-        var nextScore = state.score;
-        var nextFruit = state.fruit;
+        var nextSnake = [...snake];
+        var nextScore = score;
+        var nextFruit = fruit;
 
-        if (!outOfBounds) {
+        if (nextGameState === RUNNING) {
             nextSnake.unshift(nextSnakeHead);
             nextSnake.pop();
 
-            if (samePos(nextSnakeHead, state.fruit)) {
+            if (isSnakeEatingFruit(nextSnakeHead, state.fruit)) {
                 nextScore += 1;
                 nextSnake = enlargeSnake(nextSnake);
-                nextFruit = getRandomFruitPos(width, height, nextSnake)
+                nextFruit = getNewFruit(width, height, nextSnake)
             }
         }
 
@@ -101,7 +103,7 @@ function Snake(props) {
 
     return (
         <div className={"snake"} align={'center'} onClick={handleOnClick} onKeyDown={handleKeyEvent} tabIndex={0}>
-            <h1>Welcome to Snake</h1>
+            <h1>Welcome to Snake.js</h1>
             {info}
             <h2>Score:{state.score}</h2>
             <table className={"board"}>
@@ -110,6 +112,17 @@ function Snake(props) {
         </div>
     )
 }
+
+function isSnakeEatingItSelf(nextSnakeHead, snake) {
+    let nextSnakeBody = [...snake];
+    nextSnakeBody.pop();
+    return contains(nextSnakeHead, nextSnakeBody, samePos);
+}
+
+function isSnakeEatingFruit(nextSnakeHead, fruit) {
+    return samePos(nextSnakeHead, fruit);
+}
+
 function enlargeSnake(snake) {
     let tipOfTail = snake[snake.length-1];
     let nextSnake = [...snake];
@@ -129,7 +142,7 @@ function isOutOfBounds(pos, width, height) {
     return pos.Y < 0 || pos.Y >= height || pos.X < 0 || pos.X >= width;
 }
 
-function getRandomFruitPos(maxX, maxY, snake) {
+function getNewFruit(maxX, maxY, snake) {
     function getRandomFruitPosRecursive(maxX,   maxY, snake, remainingAttempts) {
         if (remainingAttempts === 0) {
             throw "Exhusted attempts to find fruit position";
@@ -196,7 +209,7 @@ function getInitialState(gameState, maxX, maxY) {
         speed: getInitialSpeed(),
         transform: getInitialTransformer(),
         snake: initialSnakeState,
-        fruit: getRandomFruitPos(maxX, maxY, initialSnakeState),
+        fruit: getNewFruit(maxX, maxY, initialSnakeState),
         score:0,
 
     };
