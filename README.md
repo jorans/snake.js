@@ -1,5 +1,8 @@
 A demo of this project can be found at [https://jorans.github.io/snake.js/](https://jorans.github.io/snake.js/)
 
+Deploy a new version with:
+### `npm run deploy`
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
