@@ -92,12 +92,24 @@ function Snake(props) {
 
     var info = (() => {
         if (state.gameState === SETUP) {
-            return(<p>Click to start</p>);
+            return(
+                <p>
+                    Click to start
+                </p>);
         } else if (state.gameState === RUNNING) {
-            return(<p>Use <b>LEFT</b> or <b>RIGHT</b> to turn the snakes head<br/>
-                or <b>a, w, d, s</b> to go West, North, East or South</p>);
+            return(
+                <p>
+                    Use <b>LEFT</b> or <b>RIGHT</b> to turn the snakes head<br/>
+                    or <b>a, w, d, s</b> to go West, North, East or South
+                </p>);
         } else if (state.gameState === GAMEOVER) {
-            return(<h3>Game Over!</h3>)
+            return(
+                <div>
+                    <h3>Game Over!</h3>
+                    <p>
+                        Click to restart
+                    </p>
+                </div>);
         }
     })();
 
@@ -145,7 +157,7 @@ function isOutOfBounds(pos, width, height) {
 function getNewFruit(maxX, maxY, snake) {
     function getRandomFruitPosRecursive(maxX,   maxY, snake, remainingAttempts) {
         if (remainingAttempts === 0) {
-            throw "Exhusted attempts to find fruit position";
+            throw new Error("Exhusted attempts to find fruit position");
         }
         var fruitPos = getRadomPos(maxX, maxY);
         if (!contains(fruitPos, snake, samePos)) {
