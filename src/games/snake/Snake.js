@@ -5,6 +5,7 @@ function Snake(props) {
     let SETUP = 0;
     let RUNNING = 1;
     let GAMEOVER = 2;
+    let PAUSED = 3;
     let height = props.height;
     let width = props.width;
     let board = createBoard(height, width);
@@ -62,20 +63,24 @@ function Snake(props) {
             } else if (key === "ArrowDown") {
                 setState({...state, speed: state.speed + 100});
             } else if (key === "ArrowLeft") {
-                setState({...state, transform:{dY: state.transform.dX * (-1), dX: state.transform.dY}})
+                setState({...state, transform: {dY: state.transform.dX * (-1), dX: state.transform.dY}})
             } else if (key === "ArrowRight") {
-                setState({...state, transform:{dY: state.transform.dX, dX: state.transform.dY * (-1)}})
+                setState({...state, transform: {dY: state.transform.dX, dX: state.transform.dY * (-1)}})
             } else if (key === "a") {
-                setState({...state, transform:{dY: 0, dX: -1}})
+                setState({...state, transform: {dY: 0, dX: -1}})
             } else if (key === "w") {
-                setState({...state, transform:{dY: -1, dX: 0}})
+                setState({...state, transform: {dY: -1, dX: 0}})
             } else if (key === "d") {
-                setState({...state, transform:{dY: 0, dX: 1}})
+                setState({...state, transform: {dY: 0, dX: 1}})
             } else if (key === "s") {
-                setState({...state, transform:{dY: 1, dX: 0}})
+                setState({...state, transform: {dY: 1, dX: 0}})
+            } else if (key === " " || key === "p") {
+                setState({...state, gameState: PAUSED})
             } else {
                 console.log("MOVE - " + event.key);
             }
+            } else if (state.gameState === PAUSED) {
+                setState({...state, gameState:RUNNING})
         }
     }
 
@@ -84,10 +89,19 @@ function Snake(props) {
             setState({...state, gameState:RUNNING});
         } else if (state.gameState === RUNNING) {
             setState({...state, gameState:GAMEOVER});
+        } else if (state.gameState === PAUSED) {
+            setState({...state, gameState:RUNNING});
         } else if (state.gameState === GAMEOVER) {
             setState(getInitialState(SETUP, width, height))
         }
     }
+
+    function handleLostFocus(evt) {
+        if (state.gameState === RUNNING) {
+            setState({...state, gameState:PAUSED});
+        }
+    }
+
     useInterval(() => {if (state.gameState === RUNNING) moveForward()}, state.speed);
 
     var info = (() => {
@@ -100,8 +114,17 @@ function Snake(props) {
             return(
                 <p>
                     Use <b>LEFT</b> or <b>RIGHT</b> to turn the snakes head<br/>
-                    or <b>a, w, d, s</b> to go West, North, East or South
+                    or <b>a, w, d, s</b> to go West, North, East or South<br/>
+                    Press SPACE or p to pause
                 </p>);
+        } else if (state.gameState === PAUSED) {
+            return(
+                <div>
+                    <h3>Game Paused</h3>
+                    <p>
+                        Click to continue
+                    </p>
+                </div>);
         } else if (state.gameState === GAMEOVER) {
             return(
                 <div>
@@ -114,7 +137,7 @@ function Snake(props) {
     })();
 
     return (
-        <div className={"snake"} align={'center'} onClick={handleOnClick} onKeyDown={handleKeyEvent} tabIndex={0}>
+        <div className={"snake"} align={'center'} onBlur={handleLostFocus}  onClick={handleOnClick} onKeyDown={handleKeyEvent} tabIndex={0}>
             <h1>Welcome to Snake.js</h1>
             {info}
             <h2>Score:{state.score}</h2>
@@ -253,4 +276,5 @@ function useInterval(callback, delay) {
         }
     }, [delay]);
 }
+
 export default Snake;
