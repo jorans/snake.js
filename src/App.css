@@ -1,25 +1,28 @@
 div.snake:focus{
   outline: 0;
 }
-table.board{
+table.gameBoard{
   border-spacing:0px;
   border: solid black 1px;
 }
-table.board td{
+table.gameBoard td{
   line-height: 10px;
   width: 10px;
   border: dotted lightgray 1px;
   padding: 0px;
   margin: 0px;
 }
-table.board td.empty{
+table.gameBoard td.empty{
   background-color: white;
 }
-table.board td.occupied{
+table.gameBoard td.occupied{
   background-color: black;
 }
-table.board td.apple{
+table.gameBoard td.apple{
   background-color: red;
+}
+table.gameBoard td.orange{
+  background-color: orange;
 }
 .App {
   text-align: center;

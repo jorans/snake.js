@@ -6,15 +6,20 @@ function Snake(props) {
     let RUNNING = 1;
     let GAMEOVER = 2;
     let PAUSED = 3;
+    let SNAKE = 1;
+    let APPLE = 2;
+    let ORANGE = 3
     let height = props.height;
     let width = props.width;
-    let board = createBoard(height, width);
-    const [state, setState] = useState(getInitialState(SETUP, width, height))
+    let numberOfFruits = props.numberOfFruits;
+    let gameBoard = createGameBoard(height, width);
+    const [state, setState] = useState(getInitialState(SETUP, width, height, numberOfFruits))
 
-    board[state.fruit.Y].values[state.fruit.X].value = 2;
-    state.snake.forEach(p => board[p.Y].values[p.X].value = 1);
+    state.fruits.forEach(p => placeGamePieceOnGameBoard(ORANGE, gameBoard, p));
+    placeGamePieceOnGameBoard(APPLE, gameBoard, state.fruit);
+    state.snake.forEach(p => placeGamePieceOnGameBoard(SNAKE, gameBoard, p));
 
-    let boardUI = board.map(row => {
+    let boardUI = gameBoard.map(row => {
         let cols = row.values.map(col => {
             return <td key={col.id} className={getClassNameByValue(col.value)}>&nbsp;</td>
         });
@@ -26,7 +31,7 @@ function Snake(props) {
     })
 
     function moveForward() {
-        let {snake, gameState, transform, score, fruit} = state;
+        let {snake, gameState, transform, score, fruit, fruits} = state;
         let nextSnakeHead = getNextSnakeHead(state.snake, transform);
         let outOfBounds = isOutOfBounds(nextSnakeHead, width, height);
         let snakeCollision = isSnakeEatingItSelf(nextSnakeHead, state.snake);
@@ -35,6 +40,7 @@ function Snake(props) {
         var nextSnake = [...snake];
         var nextScore = score;
         var nextFruit = fruit;
+        let nextFruits = [...fruits];
 
         if (nextGameState === RUNNING) {
             nextSnake.unshift(nextSnakeHead);
@@ -45,13 +51,32 @@ function Snake(props) {
                 nextSnake = enlargeSnake(nextSnake);
                 nextFruit = getNewFruit(width, height, nextSnake)
             }
+            fruits.forEach(f => {
+                if (isSnakeEatingFruit(nextSnakeHead, f)) {
+                    if(getGamePieceOnGameBoard(gameBoard, f) === ORANGE){
+                        nextScore += 5
+                    } else {
+                        nextScore += 1
+                    }
+                }
+            });
+            nextFruits = [];
+            fruits.forEach(f => {
+                if (!isSnakeEatingFruit(nextSnakeHead, f)) {
+                    nextFruits.push(f);
+                } else {
+                    nextSnake = enlargeSnake(nextSnake);
+                }
+
+            });
         }
 
         setState({...state,
             snake:nextSnake,
             gameState:nextGameState,
             score: nextScore,
-            fruit: nextFruit
+            fruit: nextFruit,
+            fruits: nextFruits
         });
     }
 
@@ -92,7 +117,7 @@ function Snake(props) {
         } else if (state.gameState === PAUSED) {
             setState({...state, gameState:RUNNING});
         } else if (state.gameState === GAMEOVER) {
-            setState(getInitialState(SETUP, width, height))
+            setState(getInitialState(SETUP, width, height, numberOfFruits))
         }
     }
 
@@ -130,7 +155,7 @@ function Snake(props) {
                 <div>
                     <h3>Game Over!</h3>
                     <p>
-                        Click to restart
+                        Click to reset
                     </p>
                 </div>);
         }
@@ -141,11 +166,18 @@ function Snake(props) {
             <h1>Welcome to Snake.js</h1>
             {info}
             <h2>Score:{state.score}</h2>
-            <table className={"board"}>
+            <table className={"gameBoard"}>
                 <tbody>{boardUI}</tbody>
             </table>
         </div>
     )
+}
+function getGamePieceOnGameBoard(gameBoard, pos) {
+    return gameBoard[pos.Y].values[pos.X].value;
+}
+
+function placeGamePieceOnGameBoard(gamePiece, gameBoard, pos) {
+    return gameBoard[pos.Y].values[pos.X].value = gamePiece;
 }
 
 function isSnakeEatingItSelf(nextSnakeHead, snake) {
@@ -189,8 +221,17 @@ function getNewFruit(maxX, maxY, snake) {
         return getRandomFruitPosRecursive(maxX, maxY, snake, --remainingAttempts);
     }
     return getRandomFruitPosRecursive(maxX, maxY, snake, 100);
-
-
+}
+function getFruits(maxX, maxY, snake, numberOfFruits) {
+    var fruits = [];
+    var occupiedPos = [...snake];
+    var counter = numberOfFruits;
+    while (counter-- > 0 ){
+        var fruit = getNewFruit(maxX, maxY, occupiedPos);
+        fruits.push(fruit);
+        occupiedPos.push(fruit);
+    };
+    return fruits;
 }
 
 function samePos(a, b) {
@@ -213,12 +254,14 @@ function getClassNameByValue(value) {
             return "occupied";
         case 2:
             return "apple";
+        case 3:
+            return "orange";
         default:
             return "empty";
     }
 }
 
-function createBoard(height, width) {
+function createGameBoard(height, width) {
     var result = [];
     for (var i = 0 ; i < height; i++) {
         result[i] = {id:i, values:[]};
@@ -237,7 +280,7 @@ function getInitialSnakeState(maxX, maxY) {
     ];
 }
 
-function getInitialState(gameState, maxX, maxY) {
+function getInitialState(gameState, maxX, maxY, numberOfFruits) {
     let initialSnakeState = getInitialSnakeState(maxX, maxY);
     return {
         gameState: gameState,
@@ -245,6 +288,7 @@ function getInitialState(gameState, maxX, maxY) {
         transform: getInitialTransformer(),
         snake: initialSnakeState,
         fruit: getNewFruit(maxX, maxY, initialSnakeState),
+        fruits: getFruits(maxX, maxY, initialSnakeState, 5),
         score:0,
 
     };

@@ -5,7 +5,7 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-      <Snake width={20} height={20}/>
+      <Snake width={20} height={20} numberOfFruits={5}/>
     </div>
   );
 }
